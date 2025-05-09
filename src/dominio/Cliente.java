@@ -8,7 +8,7 @@ package dominio;
  *
  * @author renzo
  */
-public class Cliente {
+public class Cliente implements Comparable<Cliente>{
     private String cedula;
     private String nombre; 
     
@@ -31,6 +31,12 @@ public class Cliente {
 
     public String getNombre() {
         return nombre;
+    }
+
+    // Orden ascendente
+    @Override
+    public int compareTo(Cliente o) {
+        return this.cedula.compareTo(o.cedula);
     }
 
    

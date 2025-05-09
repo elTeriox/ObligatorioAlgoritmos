@@ -9,13 +9,17 @@ public class Evento implements Comparable<Evento>{
     private int aforoNecesario;
     private LocalDate fecha;
     private Sala sala;
+    private int entradasDisponibles;
+    private int entradasVendidas;
     
-    public Evento(String codigo, String descripcion, int aforoNecesario, LocalDate fecha, Sala sala){
+    public Evento(String codigo, String descripcion, int aforoNecesario, LocalDate fecha, Sala sala, int entradasDisponibles, int entradasVendidas){
         this.codigo = codigo;
         this.descripcion = descripcion;
         this.aforoNecesario = aforoNecesario;
         this.fecha = fecha;
         this.sala = sala;
+        this.entradasDisponibles = entradasDisponibles;
+        this.entradasVendidas = entradasVendidas;
     }
     
     // Getters
@@ -34,6 +38,12 @@ public class Evento implements Comparable<Evento>{
     public Sala getSala(){
         return sala;
     }
+    public int getEntradasDisponibles(){
+        return entradasDisponibles;
+    }
+    public int getEntradasVendidas(){
+        return entradasVendidas;
+    }
     
     // Setters
     public void setCodigo(String codigo){
@@ -50,6 +60,12 @@ public class Evento implements Comparable<Evento>{
     }
     public void setSala(Sala sala){
         this.sala = sala;
+    }
+    public void setEntradasDisponiobles(int disponibles){
+        this.entradasDisponibles = disponibles;
+    }
+    public void setEntradasVenididas(int vendidas){
+        this.entradasVendidas = vendidas;
     }
 
     @Override
