@@ -3,8 +3,6 @@ package sistemaAutogestion;
 import java.time.LocalDate;
 import dominio.*;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import tads.*;
 
@@ -17,8 +15,8 @@ public class Sistema implements IObligatorio {
     
     public Sistema(){
         this.salas = new ListaSalaDE();
-       // this.eventos = new ListaEventosDE();
-        //this.clientes = new ListaClientes();
+        this.eventos = new ListaEventoSE();
+        this.clientes = new ListaClienteSE();
     }
     
     @Override
@@ -59,7 +57,7 @@ public class Sistema implements IObligatorio {
             return Retorno.error2();
         }
         // Validar que el codigo no exista
-        for (int i = 0; i < salas.longitud(); i++) {
+        for (int i = 0; i < eventos.longitud(); i++) {
             Evento e = (Evento) eventos.obtener(i);
             if(e.getCodigo().equals(codigo)){
                 return Retorno.error1();
@@ -70,7 +68,7 @@ public class Sistema implements IObligatorio {
             Sala sala = (Sala) salas.obtener(i);
             if(sala.getCapacidad() >= aforoNecesario && !sala.estaOcupada(fecha)){
                 // Se crea el evento y se lo asocia a la sala
-                Evento e = new Evento(codigo, descripcion, aforoNecesario, fecha, sala);
+                Evento e = new Evento(codigo, descripcion, aforoNecesario, fecha, sala, aforoNecesario, 0);
                 eventos.adicionar(e);
                 sala.agendarEvento(fecha);
                 return Retorno.ok("Evento registrado correctamente.");
@@ -120,6 +118,7 @@ public class Sistema implements IObligatorio {
         if(salas.vacia()){
             return Retorno.error1();
         }
+        // Invertir Lista
         salas.invertirIterativo();
         // Mensaje con las salas
         String mensaje = "Listado de Salas:\n";
@@ -163,7 +162,7 @@ public class Sistema implements IObligatorio {
         }
         // Si no esta ordenada, se ordena
         if(!clientes.estaOrdenada()){
-            listaAux.sort(Comparator.comparing(Cliente::getCedula));
+            listaAux.sort(null);
         }
         // Se genera el mensaje con el listado
         String mensaje = "Listado de Clientes:\n";
