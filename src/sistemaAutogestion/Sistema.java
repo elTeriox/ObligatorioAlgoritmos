@@ -8,7 +8,7 @@ public class Sistema implements IObligatorio {
 
     private static Sistema sistema;
     private ListaSalaDE salas;
-  //  private ListaEventos eventos;
+    private ListaEventoSE eventos;
     //private ListaClientes clientes;
     
     public Sistema(){
@@ -35,12 +35,44 @@ public class Sistema implements IObligatorio {
 
     @Override
     public Retorno eliminarSala(String nombre) {
-         return Retorno.noImplementada();
+        if(salas.vacia()){
+            return Retorno.error1();
+        }
+        for (int i = 0; i < salas.longitud(); i++) {
+            Sala salaActual = (Sala) salas.obtener(i);
+            if(salaActual.getNombre().equals(nombre)){
+                salas.eliminar(i);
+                return Retorno.ok("Si pudo eliminar la sala.");
+            }
+        }
+        return Retorno.error2();
     }
 
     @Override
     public Retorno registrarEvento(String codigo, String descripcion, int aforoNecesario, LocalDate fecha) {
-         return Retorno.noImplementada();
+        // Validar aforo ingresado
+        if(aforoNecesario <= 0){
+            return Retorno.error2();
+        }
+        // Validar que el codigo no exista
+        for (int i = 0; i < salas.longitud(); i++) {
+            Evento e = (Evento) eventos.obtener(i);
+            if(e.getCodigo().equals(codigo)){
+                return Retorno.error1();
+            }
+        }
+        // Buscar sala para el evento
+        for(int i = 0; i < salas.longitud(); i++){
+            Sala sala = (Sala) salas.obtener(i);
+            if(sala.getCapacidad() >= aforoNecesario && !sala.estaOcupada(fecha)){
+                // Se crea el evento y se lo asocia a la sala
+                Evento e = new Evento(codigo, descripcion, aforoNecesario, fecha, sala);
+                eventos.adicionarInicio(e);
+                sala.agendarEvento(fecha);
+                return Retorno.ok("Evento registrado correctamente.");
+            }
+        }
+        return Retorno.error3();
     }
 
     @Override

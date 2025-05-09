@@ -1,6 +1,6 @@
 package tads;
 
-public class ListaSE<T extends Comparable<T> > implements ILista<T> {
+public class ListaSE<T extends Comparable<? super T> > implements ILista<T> {
 
     protected NodoSE<T> cabeza;
     protected int longitud;
