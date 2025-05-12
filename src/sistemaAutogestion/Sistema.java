@@ -2,8 +2,6 @@ package sistemaAutogestion;
 
 import java.time.LocalDate;
 import dominio.*;
-import java.util.ArrayList;
-import java.util.List;
 import tads.*;
 
 public class Sistema implements IObligatorio {
@@ -32,7 +30,7 @@ public class Sistema implements IObligatorio {
         }
         //if (salas.existeSala(nombre)) return Retorno.error1();
         Sala nuevaSala = new Sala(nombre, capacidad);
-        nuevaSala.getNombre();
+        //if (nuevaSala.getNombre().equals(nombre)) Retorno.error1();
         for (int i = 0; i < salas.longitud(); i++) {
             Sala s = (Sala) salas.obtener(i);
             if (s.getNombre().equals(nombre)) {
@@ -59,36 +57,41 @@ public class Sistema implements IObligatorio {
         return Retorno.error2();
     }
 
+
+    
     @Override
     public Retorno registrarEvento(String codigo, String descripcion, int aforoNecesario, LocalDate fecha) {
-        // Validar aforo ingresado
-        if (aforoNecesario <= 0) {
-            return Retorno.error2();
-        }
-        // Validar que el codigo no exista
-        for (int i = 0; i < eventos.longitud(); i++) {
-            Evento e = (Evento) eventos.obtener(i);
-            if (e.getCodigo().equals(codigo)) {
-                return Retorno.error1();
-            }
-        }
-        // Buscar sala para el evento
-        for (int i = 0; i < salas.longitud(); i++) {
-            Sala sala = (Sala) salas.obtener(i);
-            if (sala.getCapacidad() >= aforoNecesario && !sala.estaOcupada(fecha)) {
-                // Se crea el evento y se lo asocia a la sala
-                Evento e = new Evento(codigo, descripcion, aforoNecesario, fecha, sala, aforoNecesario, 0);
-                eventos.adicionar(e);
-                sala.agendarEvento(fecha);
-                return Retorno.ok();
-
-            } else if (salas.longitud() == i) {
-                return Retorno.error3();
-            }
-        }
-        return Retorno.ok();
+    // Validar aforo ingresado
+    if (aforoNecesario <= 0) {
+        return Retorno.error2();
     }
 
+    // Validar que el código no exista
+    for (int i = 0; i < eventos.longitud(); i++) {
+        Evento e = (Evento) eventos.obtener(i);
+        if (e.getCodigo().equals(codigo)) {
+            return Retorno.error1(); // Evento ya registrado
+        }
+    }
+
+    // Buscar sala para el evento
+    for (int i = 0; i < salas.longitud(); i++) {
+        Sala sala = (Sala) salas.obtener(i);
+        if (sala.getCapacidad() >= aforoNecesario && !sala.estaOcupada(fecha)) {
+            Evento e = new Evento(codigo, descripcion, aforoNecesario, fecha, sala, aforoNecesario, 0);
+            eventos.adicionar(e);
+            sala.agendarEvento(fecha);
+            return Retorno.ok();
+        }
+    }
+
+    // Si no encontró sala válida
+    return Retorno.error3(); // No hay sala disponible
+}
+    
+    
+    
+    
     @Override
     public Retorno registrarCliente(String cedula, String nombre) {
         // Validar CI
@@ -101,11 +104,10 @@ public class Sistema implements IObligatorio {
             if (c.getCedula().equals(cedula)) {
                 return Retorno.error2();
             }
-            if (clientes.longitud() == i) {
-                clientes.adicionar(c);
-            }
+          
         }
-
+        Cliente nuevo = new Cliente(cedula, nombre);
+        clientes.adicionar(nuevo);
         return Retorno.ok();
     }
 
