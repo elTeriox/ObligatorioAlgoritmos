@@ -11,7 +11,7 @@ import tads.ListaSE;
  *
  * @author renzo
  */
-public class Sala {
+public class Sala implements Comparable<Sala> {
 
     private String nombre;
     private int capacidad;
@@ -52,5 +52,11 @@ public class Sala {
         if(!estaOcupada(fecha)){
             fechasOcupadas.adicionar(fecha);
         }
+    }
+
+    @Override
+    public int compareTo(Sala o) {
+        
+        return this.nombre.compareTo(o.nombre);
     }
 }

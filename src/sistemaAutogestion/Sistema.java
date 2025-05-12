@@ -12,13 +12,13 @@ public class Sistema implements IObligatorio {
     private ListaSalaDE salas;
     private ListaEventoSE eventos;
     private ListaClienteSE clientes;
-    
-    public Sistema(){
+
+    public Sistema() {
         this.salas = new ListaSalaDE();
         this.eventos = new ListaEventoSE();
         this.clientes = new ListaClienteSE();
     }
-    
+
     @Override
     public Retorno crearSistemaDeGestion() {
         sistema = new Sistema();
@@ -27,24 +27,33 @@ public class Sistema implements IObligatorio {
 
     @Override
     public Retorno registrarSala(String nombre, int capacidad) {
-         if (capacidad <= 0) return Retorno.error2();
+        if (capacidad <= 0) {
+            return Retorno.error2();
+        }
         //if (salas.existeSala(nombre)) return Retorno.error1();
-
         Sala nuevaSala = new Sala(nombre, capacidad);
-       // salas.adicionar(nuevaSala);
+        nuevaSala.getNombre();
+        for (int i = 0; i < salas.longitud(); i++) {
+            Sala s = (Sala) salas.obtener(i);
+            if (s.getNombre().equals(nombre)) {
+                return Retorno.error1();
+            }
+        }
+        salas.adicionar(nuevaSala);
+        // salas.adicionar(nuevaSala);
         return Retorno.ok();
     }
 
     @Override
     public Retorno eliminarSala(String nombre) {
-        if(salas.vacia()){
+        if (salas.vacia()) {
             return Retorno.error1();
         }
         for (int i = 0; i < salas.longitud(); i++) {
             Sala salaActual = (Sala) salas.obtener(i);
-            if(salaActual.getNombre().equals(nombre)){
+            if (salaActual.getNombre().equals(nombre)) {
                 salas.eliminar(i);
-                return Retorno.ok("Si pudo eliminar la sala.");
+                return Retorno.ok();
             }
         }
         return Retorno.error2();
@@ -53,44 +62,51 @@ public class Sistema implements IObligatorio {
     @Override
     public Retorno registrarEvento(String codigo, String descripcion, int aforoNecesario, LocalDate fecha) {
         // Validar aforo ingresado
-        if(aforoNecesario <= 0){
+        if (aforoNecesario <= 0) {
             return Retorno.error2();
         }
         // Validar que el codigo no exista
         for (int i = 0; i < eventos.longitud(); i++) {
             Evento e = (Evento) eventos.obtener(i);
-            if(e.getCodigo().equals(codigo)){
+            if (e.getCodigo().equals(codigo)) {
                 return Retorno.error1();
             }
         }
         // Buscar sala para el evento
-        for(int i = 0; i < salas.longitud(); i++){
+        for (int i = 0; i < salas.longitud(); i++) {
             Sala sala = (Sala) salas.obtener(i);
-            if(sala.getCapacidad() >= aforoNecesario && !sala.estaOcupada(fecha)){
+            if (sala.getCapacidad() >= aforoNecesario && !sala.estaOcupada(fecha)) {
                 // Se crea el evento y se lo asocia a la sala
                 Evento e = new Evento(codigo, descripcion, aforoNecesario, fecha, sala, aforoNecesario, 0);
                 eventos.adicionar(e);
                 sala.agendarEvento(fecha);
-                return Retorno.ok("Evento registrado correctamente.");
+                return Retorno.ok();
+
+            } else if (salas.longitud() == i) {
+                return Retorno.error3();
             }
         }
-        return Retorno.error3();
+        return Retorno.ok();
     }
 
     @Override
     public Retorno registrarCliente(String cedula, String nombre) {
         // Validar CI
-        if(cedula.length() != 8){
+        if (cedula.length() != 8) {
             return Retorno.error1();
         }
         // Buscar si ya existe el cliente
         for (int i = 0; i < clientes.longitud(); i++) {
             Cliente c = (Cliente) clientes.obtener(i);
-            if(c.getCedula().equals(cedula)){
+            if (c.getCedula().equals(cedula)) {
                 return Retorno.error2();
             }
+            if (clientes.longitud() == i) {
+                clientes.adicionar(c);
+            }
         }
-        return Retorno.ok("Si pudo registrar el cliente.");
+
+        return Retorno.ok();
     }
 
     @Override
@@ -115,10 +131,11 @@ public class Sistema implements IObligatorio {
 
     @Override
     public Retorno listarSalas() {
-        if(salas.vacia()){
+        if (salas.vacia()) {
             return Retorno.error1();
         }
         // Invertir Lista
+        //todo: agregar att ultimo en listaDE? asi solo recorre para mostrar y no se utiliza 2 veces el .invertirIterativo()
         salas.invertirIterativo();
         // Mensaje con las salas
         String mensaje = "Listado de Salas:\n";
@@ -133,43 +150,48 @@ public class Sistema implements IObligatorio {
 
     @Override
     public Retorno listarEventos() {
-        List<Evento> listaAux = new ArrayList<>();
+        ListaEventoSE listaAux = new ListaEventoSE();
         for (int i = 0; i < eventos.longitud(); i++) {
             Evento actual = (Evento) eventos.obtener(i);
-            listaAux.add(actual);
+            listaAux.adicionar(actual);
         }
         //Ordenar segun codigo
-        listaAux.sort(null);
+
+        //listaAux.sort(null);
         // Mensaje a devolver
         String mensaje = "Listado de Eventos:\n";
-        for(Evento e : listaAux){
+        // while(miListaSE.)String mensaje = "Listado de Eventos:\n";
+        for (int i = 0; i < listaAux.longitud(); i++) {
+            Evento e = (Evento) listaAux.obtener(i);
             mensaje += "-Codigo: " + e.getCodigo()
                     + ", Descripcion: " + e.getDescripcion()
                     + ", Sala: " + e.getSala()
                     + ", Entradas disponibles: " + e.getEntradasDisponibles()
                     + ", Entradas vendidas: " + e.getEntradasVendidas() + "\n";
         }
+
         return Retorno.ok(mensaje);
     }
 
     @Override
     public Retorno listarClientes() {
-        // Crear lista auxiliar
-        List<Cliente> listaAux = new ArrayList<>();
+        ListaClienteSE listaAux = new ListaClienteSE();
         // Agregar los clientes a la lista auxiliar
         for (int i = 0; i < clientes.longitud(); i++) {
-            listaAux.add((Cliente) clientes.obtener(i));
+            listaAux.adicionar((Cliente) clientes.obtener(i));
         }
         // Si no esta ordenada, se ordena
-        if(!clientes.estaOrdenada()){
-            listaAux.sort(null);
+        if (!clientes.estaOrdenada()) {
+          //  listaAux.ordenar();
         }
+
         // Se genera el mensaje con el listado
         String mensaje = "Listado de Clientes:\n";
-        for (Cliente c : listaAux) {
+        for (int i = 0; i < listaAux.longitud(); i++) {
+            Cliente c = (Cliente) listaAux.obtener(i);
             mensaje += "- " + c.getCedula() + ", Nombre: " + c.getNombre() + "\n";
         }
-        
+
         return Retorno.ok(mensaje);
     }
 
@@ -178,15 +200,15 @@ public class Sistema implements IObligatorio {
         int filas = vistaSala.length;
         int columnas = vistaSala[0].length;
         int columnasOptimas = 0;
-        
+
         // Se recorre cada columna
-        for(int col = 0; col < columnas; col++){
+        for (int col = 0; col < columnas; col++) {
             int libres = 0;
             int ocupadosConsecutivos = 0;
             int maxOcupadosConsecutivos = 0;
-            
+
             // Se recorre cada fila de esa columna
-            for(int fila = 0; fila < filas; fila++){
+            for (int fila = 0; fila < filas; fila++) {
                 String valor = vistaSala[fila][col];
                 switch (valor) {
                     // Si esta libre se suma a la variable y se cortan los OcupadosConsecutivos
@@ -194,29 +216,29 @@ public class Sistema implements IObligatorio {
                         libres++;
                         ocupadosConsecutivos = 0;
                         break;
-                        //Si esta ocupado se suma a ocupadosConsecutivos
+                    //Si esta ocupado se suma a ocupadosConsecutivos
                     case "O":
                         ocupadosConsecutivos++;
                         // Se compara para establecer el maximo
-                        if(ocupadosConsecutivos > maxOcupadosConsecutivos){
+                        if (ocupadosConsecutivos > maxOcupadosConsecutivos) {
                             maxOcupadosConsecutivos = ocupadosConsecutivos;
                         }
                         break;
-                        // Si es "#" se cortan los ocupadosConsecutivos
+                    // Si es "#" se cortan los ocupadosConsecutivos
                     default:
                         ocupadosConsecutivos = 0;
                         break;
                 }
             }
             // Se verifica que la columna sea optima
-            if(maxOcupadosConsecutivos > libres){
+            if (maxOcupadosConsecutivos > libres) {
                 columnasOptimas++;
             }
         }
         String mensaje = "";
-        if(columnasOptimas > 2){
+        if (columnasOptimas > 2) {
             mensaje += "Es optimo.";
-        }else{
+        } else {
             mensaje += "No es optimo";
         }
         return Retorno.ok(mensaje);

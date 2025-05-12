@@ -4,10 +4,6 @@
  */
 package dominio;
 
-/**
- *
- * @author renzo
- */
 public class Cliente implements Comparable<Cliente>{
     private String cedula;
     private String nombre; 
